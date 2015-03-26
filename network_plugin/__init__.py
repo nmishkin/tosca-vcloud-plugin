@@ -193,7 +193,7 @@ def get_gateway(vca_client, gateway_name):
     gateway = vca_client.get_gateway(get_vcloud_config()['vdc'],
                                      gateway_name)
     if not gateway:
-        raise cfy_exc.NonRecoverableError("Gateway {0}  not found".format(gateway_name))
+        raise cfy_exc.NonRecoverableError("Gateway {0} not found".format(gateway_name))
     return gateway
 
 
@@ -212,8 +212,7 @@ def check_port(port):
             return port
         else:
             raise cfy_exc.NonRecoverableError("Invalid 'port' value. Port value must be between 1 and 65535")
-    elif isinstance(port, unicode):
-            if port.lower() == "any":
-                return port.lower()
-    else:
-        raise cfy_exc.NonRecoverableError("Parameter 'port' must be integer, or 'any'")
+    elif isinstance(port, unicode) or isinstance(port, str):
+        if port.lower() == "any":
+            return port.lower()
+    raise cfy_exc.NonRecoverableError("Parameter 'port' must be integer, or 'any'")
