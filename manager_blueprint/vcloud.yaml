@@ -165,7 +165,7 @@ node_templates:
             vcloud_config: { get_property: [vcloud_configuration, vcloud_config] }
         relationships:
             - target: manager_floating_ip
-              type: cloudify.relationships.depends_on
+              type: cloudify.relationships.contained_in
 
     manager_server:
         type: cloudify.vcloud.nodes.Server
