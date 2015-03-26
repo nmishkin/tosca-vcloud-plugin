@@ -143,12 +143,10 @@ def _dhcp_operation(vca_client, network_name, operation):
         gateway.add_dhcp_pool(network_name, low_ip_address, hight_ip_address,
                               default_lease, max_lease)
         ctx.logger.info("DHCP rule successful created for network {0}".format(network_name))
-        error_message = "Could not add DHCP pool"
 
     if operation == DELETE_POOL:
         gateway.delete_dhcp_pool(network_name)
         ctx.logger.info("DHCP rule successful deleted for network {0}".format(network_name))
-        error_message = "Could not delete DHCP pool"
 
     if not  save_gateway_configuration(gateway, vca_client):
         return ctx.operation.retry(message='Waiting for gateway.',
