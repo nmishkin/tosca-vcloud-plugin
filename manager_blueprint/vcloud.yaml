@@ -140,7 +140,7 @@ node_templates:
             rules:
                 - source: external
                   source_port: any
-                  destination: internal
+                  destination: public
                   destination_port: 22
                   action: allow
                   description: >
@@ -148,7 +148,7 @@ node_templates:
                   protocol: TCP
                 - source: external
                   source_port: any
-                  destination: internal
+                  destination: public
                   destination_port: 80
                   action: allow
                   description: >
@@ -163,6 +163,9 @@ node_templates:
                          backward network connection for host updates
                   protocol: any
             vcloud_config: { get_property: [vcloud_configuration, vcloud_config] }
+        relationships:
+            - target: manager_floating_ip
+              type: cloudify.relationships.depends_on
 
     manager_server:
         type: cloudify.vcloud.nodes.Server

@@ -3,13 +3,16 @@ from cloudify import exceptions as cfy_exc
 from cloudify.decorators import operation
 from vcloud_plugin_common import with_vca_client, get_mandatory, get_vcloud_config
 from network_plugin import (check_ip, get_vm_ip, save_gateway_configuration,
-                            check_protocol, check_port, get_gateway)
+                            check_protocol, check_port, get_gateway, PUBLIC_IP)
 
 
 CREATE_RULE = 1
 DELETE_RULE = 2
 
-ADDRESS_LITERALS = ("Any", "Internal", "External", "Host")
+ADDRESS_LITERAL_HOST = "Host"
+ADDRESS_LITERAL_PUBLIC = "Public"
+
+ADDRESS_LITERALS = ("Any", "Internal", "External", ADDRESS_LITERAL_PUBLIC, ADDRESS_LITERAL_HOST)
 ACTIONS = ("allow", "deny")
 
 
@@ -66,6 +69,12 @@ def creation_validation(vca_client, **kwargs):
             raise cfy_exc.NonRecoverableError("Parameter 'log_traffic' must be boolean.")
 
 
+def _get_public_ip():
+    print ctx.target.instance.runtime_properties
+    print ctx.target.node.properties
+    return ctx.target.instance.runtime_properties.get(PUBLIC_IP) or \
+                ctx.target.node.properties['floatingip'].get(PUBLIC_IP)
+
 def _rule_operation(operation, vca_client):
     gateway = get_gateway(vca_client, _get_gateway_name(ctx.target.node.properties))
     for rule in ctx.target.node.properties['rules']:
@@ -73,13 +82,19 @@ def _rule_operation(operation, vca_client):
         source_ip = rule.get("source", "external").capitalize()
         if source_ip not in ADDRESS_LITERALS:
             check_ip(source_ip)
-        elif source_ip == ADDRESS_LITERALS[-1]:
+        elif source_ip == ADDRESS_LITERAL_PUBLIC:
+            source_ip = _get_public_ip()
+            check_ip(source_ip)
+        elif source_ip == ADDRESS_LITERAL_HOST:
             source_ip = get_vm_ip(vca_client, ctx)
         source_port = str(rule.get("source_port", "any")).capitalize()
         dest_ip = rule.get("destination", "external").capitalize()
         if dest_ip not in ADDRESS_LITERALS:
             check_ip(dest_ip)
-        elif dest_ip == ADDRESS_LITERALS[-1]:
+        elif dest_ip == ADDRESS_LITERAL_PUBLIC:
+            dest_ip = _get_public_ip()
+            check_ip(dest_ip)
+        elif dest_ip == ADDRESS_LITERAL_HOST:
             dest_ip = get_vm_ip(vca_client, ctx)
         dest_port = str(rule.get('destination_port', "any")).capitalize()
         protocol = rule.get('protocol', "any").capitalize()
