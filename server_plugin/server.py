@@ -156,6 +156,11 @@ def start(vca_client, **kwargs):
             raise cfy_exc.NonRecoverableError("Could not create vApp")
         wait_for_task(vca_client, task)
 
+    if not _get_state(vca_client, ctx):
+        return ctx.operation.retry(
+            message="Waiting for VM's configuration to complete",
+            retry_after=5)
+
 
 @operation
 @with_vca_client
@@ -186,9 +191,7 @@ def delete(vca_client, **kwargs):
     del ctx.instance.runtime_properties[VCLOUD_VAPP_NAME]
 
 
-@operation
-@with_vca_client
-def get_state(vca_client, **kwargs):
+def _get_state(vca_client, ctx):
     vapp_name = get_vapp_name(ctx.instance.runtime_properties)
     config = get_vcloud_config()
     vdc = vca_client.get_vdc(config['vdc'])
@@ -304,7 +307,8 @@ def _create_connections_list(vca_client):
                                               port_properties.get('ip_address'),
                                               port_properties.get('mac_address'),
                                               port_properties.get('ip_allocation_mode',
-                                                                  'DHCP').upper()))
+                                                                  'DHCP').upper(),
+                                              port_properties.get('primary_interface', False)))
     for net in networks:
         connections.append(_create_connection(get_network_name(net.node.properties),
                                               None, None, 'DHCP'))
@@ -312,11 +316,17 @@ def _create_connections_list(vca_client):
     if not any([conn['network'] == management_network_name for conn in connections]):
         connections.append(_create_connection(management_network_name,
                                               None, None, 'DHCP'))
+
+    primary_iface_set = len(filter(lambda conn: conn.get('primary_interface',
+                                                         False),
+                                   connections)) > 0
+
     for conn in connections:
         network_name = conn['network']
         if conn['ip_allocation_mode'] == 'DHCP' and not _isDhcpAvailable(vca_client, network_name):
             raise cfy_exc.NonRecoverableError("DHCP for network {0} is not available".format(network_name))
-        conn['primary_interface'] = (network_name == management_network_name)
+        if primary_iface_set is False:
+            conn['primary_interface'] = (network_name == management_network_name)
     return connections
 
 
@@ -329,11 +339,13 @@ def _get_connected(instance, prop):
         return []
 
 
-def _create_connection(network, ip_address, mac_address, ip_allocation_mode):
+def _create_connection(network, ip_address, mac_address, ip_allocation_mode,
+                       primary_interface=False):
     return {'network': network,
             'ip_address': ip_address,
             'mac_address': mac_address,
-            'ip_allocation_mode': ip_allocation_mode}
+            'ip_allocation_mode': ip_allocation_mode,
+            'primary_interface': primary_interface}
 
 
 def _isDhcpAvailable(vca_client, network_name):
