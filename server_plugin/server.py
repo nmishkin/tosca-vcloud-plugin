@@ -35,6 +35,10 @@ DEFAULT_HOME = "/home"
 @operation
 @with_vca_client
 def creation_validation(vca_client, **kwargs):
+    if ctx.node.properties.get('use_external_resource'):
+        # TODO: check: vApp must exists
+        return
+
     def get_catalog(catalog_name):
         catalogs = vca_client.get_catalogs()
         for catalog in catalogs:
@@ -75,6 +79,13 @@ def create(vca_client, **kwargs):
     server.update(ctx.node.properties['server'])
     transform_resource_name(server, ctx)
 
+    if ctx.node.properties['use_external_resource']:
+        res_id = ctx.node.properties['resource_id']
+        ctx.instance.runtime_properties[VCLOUD_VAPP_NAME] = res_id
+        ctx.logger.info(
+            "External resource {0} has been used".format(res_id))
+        return
+    
     vapp_name = server['name']
     vapp_template = server['template']
     vapp_catalog = server['catalog']
@@ -173,6 +184,9 @@ def create(vca_client, **kwargs):
 @operation
 @with_vca_client
 def start(vca_client, **kwargs):
+    if ctx.node.properties.get('use_external_resource'):
+        return
+
     vapp_name = get_vapp_name(ctx.instance.runtime_properties)
     config = get_vcloud_config()
     vdc = vca_client.get_vdc(config['vdc'])
@@ -193,6 +207,9 @@ def start(vca_client, **kwargs):
 @operation
 @with_vca_client
 def stop(vca_client, **kwargs):
+    if ctx.node.properties.get('use_external_resource'):
+        return
+
     vapp_name = get_vapp_name(ctx.instance.runtime_properties)
     config = get_vcloud_config()
     vdc = vca_client.get_vdc(config['vdc'])
@@ -207,6 +224,9 @@ def stop(vca_client, **kwargs):
 @operation
 @with_vca_client
 def delete(vca_client, **kwargs):
+    if ctx.node.properties.get('use_external_resource'):
+        return
+
     vapp_name = get_vapp_name(ctx.instance.runtime_properties)
     config = get_vcloud_config()
     vdc = vca_client.get_vdc(config['vdc'])
