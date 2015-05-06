@@ -184,19 +184,17 @@ def create(vca_client, **kwargs):
 @operation
 @with_vca_client
 def start(vca_client, **kwargs):
-    if ctx.node.properties.get('use_external_resource'):
-        return
-
-    vapp_name = get_vapp_name(ctx.instance.runtime_properties)
-    config = get_vcloud_config()
-    vdc = vca_client.get_vdc(config['vdc'])
-    vapp = vca_client.get_vapp(vdc, vapp_name)
-    if _vapp_is_on(vapp) is False:
-        ctx.logger.info("Power-on VApp {0}".format(vapp_name))
-        task = vapp.poweron()
-        if not task:
-            raise cfy_exc.NonRecoverableError("Could not create vApp")
-        wait_for_task(vca_client, task)
+    if not ctx.node.properties.get('use_external_resource'):
+        vapp_name = get_vapp_name(ctx.instance.runtime_properties)
+        config = get_vcloud_config()
+        vdc = vca_client.get_vdc(config['vdc'])
+        vapp = vca_client.get_vapp(vdc, vapp_name)
+        if _vapp_is_on(vapp) is False:
+            ctx.logger.info("Power-on VApp {0}".format(vapp_name))
+            task = vapp.poweron()
+            if not task:
+                raise cfy_exc.NonRecoverableError("Could not create vApp")
+                wait_for_task(vca_client, task)
 
     if not _get_state(vca_client, ctx):
         return ctx.operation.retry(
@@ -259,7 +257,7 @@ def _get_state(vca_client, ctx):
 
     for connection in nw_connections:
         networks[connection['network_name']] = connection['ip']
-        if connection['network_name'] == management_network_name:
+        if ctx.node.properties.get('use_external_resource') or connection['network_name'] == management_network_name:
             ctx.logger.info("Management network ip address {0}"
                             .format(connection['ip']))
             ctx.instance.runtime_properties['ip'] = connection['ip']
