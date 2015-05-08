@@ -294,7 +294,8 @@ class VcloudAirClient(object):
             host=url,
             username=username,
             service_type=PRIVATE_SERVICE_TYPE,
-            version=api_version)
+            version=api_version,
+            log=True) # TODO: get from context?
 
         if logined is False and password:
             for _ in range(self.LOGIN_RETRY_NUM):
