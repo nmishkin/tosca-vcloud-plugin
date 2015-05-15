@@ -138,6 +138,7 @@ class VcloudAirClient(object):
         instance = cfg.get('instance')
         org_url = cfg.get('org_url', None)
         api_version = cfg.get('api_version', '5.6')
+        log = cfg.get('log')
         if not (all([url, token]) or all([url, username, password])):
             raise cfy_exc.NonRecoverableError(
                 "Login credentials must be specified")
@@ -148,28 +149,28 @@ class VcloudAirClient(object):
 
         if service_type == SUBSCRIPTION_SERVICE_TYPE:
             vcloud_air = self._subscription_login(
-                url, username, password, token, service, org_name)
+                url, username, password, token, service, org_name, log)
         elif service_type == ONDEMAND_SERVICE_TYPE:
             vcloud_air = self._ondemand_login(
-                url, username, password, token, instance)
+                url, username, password, token, instance, log)
         # The actual service type for private is 'vcd', but we should accept
         # 'private' as well, for user friendliness of inputs
         elif service_type in (PRIVATE_SERVICE_TYPE, 'private'):
             vcloud_air = self._private_login(
-                url, username, password, token, org_name, org_url, api_version)
+                url, username, password, token, org_name, org_url, api_version, log)
         else:
             raise cfy_exc.NonRecoverableError(
                 "Unrecognized service type: {0}".format(service_type))
         return vcloud_air
 
     def _subscription_login(self, url, username, password, token, service,
-                            org_name):
+                            org_name, log):
         logined = False
         vdc_logined = False
 
         vca = vcloudair.VCA(
             url, username, service_type=SUBSCRIPTION_SERVICE_TYPE,
-            version='5.6')
+            version='5.6', log=log)
         if token:
             for _ in range(self.LOGIN_RETRY_NUM):
                 logined = vca.login(token=token)
@@ -211,7 +212,7 @@ class VcloudAirClient(object):
         atexit.register(vca.logout)
         return vca
 
-    def _ondemand_login(self, url, username, password, token, instance_id):
+    def _ondemand_login(self, url, username, password, token, instance_idm, log):
         def get_instance(vca, instance_id):
             instances = vca.get_instances() or []
             for instance in instances:
@@ -225,7 +226,7 @@ class VcloudAirClient(object):
         instance_logined = False
 
         vca = vcloudair.VCA(
-            url, username, service_type=ONDEMAND_SERVICE_TYPE, version='5.7')
+            url, username, service_type=ONDEMAND_SERVICE_TYPE, version='5.7', log=log)
 
         if token:
             for _ in range(self.LOGIN_RETRY_NUM):
@@ -291,14 +292,15 @@ class VcloudAirClient(object):
         return vca
 
     def _private_login(self, url, username, password, token, org_name,
-                       org_url=None, api_version='5.6'):
+                       org_url=None, api_version='5.6', log=false):
         logined = False
 
         vca = vcloudair.VCA(
             host=url,
             username=username,
             service_type=PRIVATE_SERVICE_TYPE,
-            version=api_version)
+            version=api_version,
+            log=log)
 
         if logined is False and password:
             for _ in range(self.LOGIN_RETRY_NUM):
