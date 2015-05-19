@@ -138,7 +138,7 @@ class VcloudAirClient(object):
         region = cfg.get('region')
         org_url = cfg.get('org_url', None)
         api_version = cfg.get('api_version', '5.6')
-        log = cfg.get('log').lower() == "true"
+        log = cfg.get('log')
         if not (all([url, token]) or all([url, username, password])):
             raise cfy_exc.NonRecoverableError(
                 "Login credentials must be specified")
