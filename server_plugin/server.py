@@ -194,7 +194,7 @@ def start(vca_client, **kwargs):
             task = vapp.poweron()
             if not task:
                 raise cfy_exc.NonRecoverableError("Could not create vApp")
-                wait_for_task(vca_client, task)
+            wait_for_task(vca_client, task)
 
     if not _get_state(vca_client, ctx):
         return ctx.operation.retry(
