@@ -292,7 +292,7 @@ class VcloudAirClient(object):
         return vca
 
     def _private_login(self, url, username, password, token, org_name,
-                       org_url=None, api_version='5.6', log=false):
+                       org_url=None, api_version='5.6', log=False):
         logined = False
 
         vca = vcloudair.VCA(
