@@ -1,0 +1,21 @@
+vcloud_username: UUUUU
+vcloud_password: PPPPP
+vcloud_url: https://cirrus.eng.vmware.com
+vcloud_service: VDC
+vcloud_org: Development
+vcloud_vdc: Development-PayGo
+vcloud_service_type: vcd
+vcloud_instance: 00000000-0000-0000-0000-000000000000
+edge_gateway: temp-gw
+manager_server_name: UUUUU-cfy-mgr-3.2
+manager_server_catalog: vca-sed
+manager_server_template: ubuntu-server-12.04-amd64-from-vca
+manager_server_public_ip:
+management_network_use_existing: true
+management_network_name: Development
+management_network_public_ip:
+manager_private_key_path: ~/deployer-dev/cloudify/dev/manager-ssh/id_rsa
+agent_private_key_path: ~/deployer-dev/cloudify/dev/manager-ssh/id_rsa
+manager_public_key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC92I4vbs0FmU9w/TudmXPRt/sLs++woAaqQTjIbSCfcDGm83s/F/ezEZ/b0J7RkI9VYq3Zj1ujwn46/+Jl80K8Tiouos+8gEkf4CnR2RqXA3nctBOz/hmI9uvIdJShpLrFaOKhiYM5bQgZGjTAU/MX7AwyDqjIARQhPt/GB65JgHTExIL5cWJYeCW6jHJvTEMWPNjor4pQiOyj8PLjkqWnFjnLUSKDEBxlsxIZd9/dsFCjHzB7R6sJvVB+Qpgmmeh7mIJc3BIUmkpspl+/C0nl2vTkRo7+BtQAoYfspJWB7piGsIMxhW04WQXfUhtLumrxRlYoTxrdL+F0xfjX9tpd root@Ubuntu1204s-001
+agent_public_key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC92I4vbs0FmU9w/TudmXPRt/sLs++woAaqQTjIbSCfcDGm83s/F/ezEZ/b0J7RkI9VYq3Zj1ujwn46/+Jl80K8Tiouos+8gEkf4CnR2RqXA3nctBOz/hmI9uvIdJShpLrFaOKhiYM5bQgZGjTAU/MX7AwyDqjIARQhPt/GB65JgHTExIL5cWJYeCW6jHJvTEMWPNjor4pQiOyj8PLjkqWnFjnLUSKDEBxlsxIZd9/dsFCjHzB7R6sJvVB+Qpgmmeh7mIJc3BIUmkpspl+/C0nl2vTkRo7+BtQAoYfspJWB7piGsIMxhW04WQXfUhtLumrxRlYoTxrdL+F0xfjX9tpd root@Ubuntu1204s-001
+management_port_ip_allocation_mode: pool
